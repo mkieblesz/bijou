@@ -2,8 +2,8 @@ import importlib
 import inspect
 import os
 
-from flask.ext.script.commands import Command
-from flask.ext.script import Manager
+from flask_script.commands import Command
+from flask_script import Manager
 
 from bijou.application import get_app
 

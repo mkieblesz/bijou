@@ -1,2 +1,3 @@
 flake8==3.2.1
 coverage==4.3.4
+vcrpy=1.10.5

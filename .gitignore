@@ -1,2 +1,6 @@
-.venv
-bijou.db
+/.venv
+/bijou.db
+/tests/data
+*.pyc
+**/__pycache__
+/.vscode

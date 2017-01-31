@@ -4,7 +4,6 @@ import os
 from werkzeug.exceptions import HTTPException
 
 from flask import Flask
-from flask_caching import Cache
 
 
 def register_logging(app):
@@ -12,17 +11,17 @@ def register_logging(app):
 
 
 def register_exceptions(app):
-    from bijou.exceptions import ErrorException, UncategorisedError
+    from bijou.exceptions import ApiException, UncategorisedException
 
     def make_response(ex):
-        if not isinstance(ex, ErrorException):
-            ex = UncategorisedError(message=str(ex), status=(ex.code if isinstance(ex, HTTPException) else 500))
+        if not isinstance(ex, ApiException):
+            ex = UncategorisedException(message=str(ex), status=(ex.code if isinstance(ex, HTTPException) else 500))
 
         # TODO: use Snetry instead
         log_message = str(ex)
         if ex.is_error():
             app.logger.exception(log_message)
-        elif ex.is_info():
+        else:
             app.logger.info(log_message)
 
         return ex.get_response()
@@ -43,23 +42,30 @@ def register_exiting():
     atexit.register(exiting())
 
 
-def register_endpoints(app):
-    from bijou.api.endpoints import ModelEndpoint, SwipeEndpoint
-    from bijou.web.views import HomeView
+def register_db(app):
+    from bijou.models import db
 
-    # all api endpoints
-    app.add_url_rule('/<str:name>/<int:id>', view_func=ModelEndpoint.as_view('model'))
-    app.add_url_rule('/<int:product_id>', view_func=SwipeEndpoint.as_view('swipe'))
-
-    # all web endpoints
-    app.add_url_rule('/', view_func=HomeView.as_view('homeview'))
+    db.session = db.create_scoped_session(options=app.config['SQLALCHEMY_SESSION_OPTIONS'])
+    db.init_app(app)
+    db.create_all()
+    app.db = db
 
     return app
 
 
-def register_cache(app):
-    cache = Cache(app)
-    app.cache = cache
+def register_endpoints(app):
+    from bijou.api.endpoints import ModelEndpoint, SwipeEndpoint
+    from bijou.web.views import HomeView
+
+    # api endpoints
+    app.add_url_rule('/swipe/<int:product_id>', view_func=SwipeEndpoint.as_view('swipe'))
+    app.add_url_rule('/<name>/<int:id>', view_func=ModelEndpoint.as_view('model'))
+    app.add_url_rule('/<name>', view_func=ModelEndpoint.as_view('model_list'))
+
+    # web endpoints
+    app.add_url_rule('/', view_func=HomeView.as_view('homeview'))
+
+    return app
 
 
 def create_base_app():
@@ -70,9 +76,9 @@ def create_base_app():
 
 def register_all_apps(app):
     register_logging(app)
+    register_db(app)
     register_endpoints(app)
     register_exceptions(app)
-    register_cache(app)
 
 
 def get_app():
@@ -86,6 +92,12 @@ def get_app():
     # environment config (tst/dev/stg/prd)
     app.config.from_pyfile(os.path.join(base_dir, 'config.cfg'), silent=True)
 
+    return app
+
+
+def get_registered_app():
+    app = get_app()
+    register_all_apps(app)
     return app
 
 
