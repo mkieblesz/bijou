@@ -1,7 +1,7 @@
 from scrapers import RequestScraper
 
 
-class Spider(object):
+class Scraper(object):
     '''Scraping controller interface'''
     start_page_url = None
     scraper_cls = None
@@ -9,11 +9,18 @@ class Spider(object):
     def __init__(self, scraper_cls=RequestScraper):
         super().__init__()
 
-        self.scraper = scraper_cls()
+        self.scraper_cls
+        self.session = self.create_session()
 
     def run(self):
-        '''Spider runner'''
+        '''Scraper runner'''
         self.scrape_categories(self.start_page_url)
+
+    def parse(self, dom):
+        pass
+
+    def scrape(self, scraping_method):
+        pass
 
     def scrape_category_listing(self, category_listing_url):
         '''Loop through categories given start url'''

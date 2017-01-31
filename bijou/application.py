@@ -45,13 +45,19 @@ def register_exiting():
 
 def register_endpoints(app):
     from bijou.api.endpoints import ModelEndpoint, SwipeEndpoint
+    from bijou.models import db
     from bijou.web.views import HomeView
 
-    # all api endpoints
+    # database
+    db.session = db.create_scoped_session(options=app.config['SQLALCHEMY_SESSION_OPTIONS'])
+    db.init_app(app)
+    app.db = db
+
+    # api endpoints
     app.add_url_rule('/<str:name>/<int:id>', view_func=ModelEndpoint.as_view('model'))
     app.add_url_rule('/<int:product_id>', view_func=SwipeEndpoint.as_view('swipe'))
 
-    # all web endpoints
+    # web endpoints
     app.add_url_rule('/', view_func=HomeView.as_view('homeview'))
 
     return app

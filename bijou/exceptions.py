@@ -1,7 +1,7 @@
 from flask import jsonify
 
 
-class ScraperException(Exception):
+class SpiderException(Exception):
     message = None
 
     def __init__(self, message=None, status=None):
@@ -9,7 +9,13 @@ class ScraperException(Exception):
             self.message = message
 
 
-class ConnectionRefusedError(ScraperException):
+class RetryLimitException(SpiderException):
+    code = 15011
+    status = 500
+    message = 'Could not scrape page'
+
+
+class ConnectionRefusedError(SpiderException):
     '''Throw when scraper has problem with creating session/refused connection with given url'''
     code = 15002
     status = 504
