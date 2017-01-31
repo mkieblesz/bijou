@@ -1,0 +1,14 @@
+# Application server
+gunicorn==19.6.0
+gevent==1.2.1
+
+# Python 3rd parties
+beautifulsoup4==4.5.3
+requests==2.13.0
+celery==4.0.2  # currently Python3.6 is not officialy supported by celery so keep an eye on it
+
+flask==0.12.0
+
+# Flask 3rd parties
+flask-migrate==2.0.3
+flask-script==2.0.5
