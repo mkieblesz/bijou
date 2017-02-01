@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 from bijou.exceptions import ParserException
 from bijou.models import Shop, ShopCategory, ShopProduct
 from bijou.scrapers.base import Scraper
@@ -50,9 +51,9 @@ class FarahScraper(Scraper, FarahScraperMixin):
 
 class FarahCategoryScraper(Scraper, FarahScraperMixin):
     '''Scrape left sidebar category tree and all products if leaf'''
+
     def parse(self, dom):
-        # if nothing selected it is tree root
-        category_name = dom.select_one('.extended-text-content > .cat-container > h1').get_text('', strip=True)
+        category_name = dom.select('.breadcrumb > a')[-1].get_text('', strip=True)
         category = ShopCategory.get(name=category_name)
 
         if category is None:
@@ -65,23 +66,18 @@ class FarahCategoryScraper(Scraper, FarahScraperMixin):
                 is_leaf = True
 
         if is_leaf:
-            # TODO: loop through the products and start product scrapers, ideally by manipulating get params
-            # if self.paginate:
-            #     for product_listing_url in product_page_generator():
-            #         # don't paginate
-            #         self.defer(FarahProductListingScraper, **{'page_url': product_listing_url, 'paginate': False})
+            # TODO: make pages as big as possible, good candidate for new scraper (if there will be a lot of pages
+            # synchronous calling will cause problems + all pages might not display on same page)
+            # first page
+            self.defer(FarahProductListingScraper, **{'page_url': self.page_url, 'dom': dom})
+            # next pages
+            for page_link in dom.select('.searchresultsfooter .pagination li a'):
+                self.defer(FarahProductListingScraper, **{'page_url': page_link.get('href')})
 
-            return {
-                'product_pages': [
-                    elem.get('href')
-                    for elem in dom.select('div.productlisting div.name > a')
-                ]
-            }
+            return []
 
-        # if root category just get list
         if dom.select_one('ul.refinementcategory a.refineLink.active') is None:
             sub_categories = dom.select('ul.refinementcategory > li > a')
-        # get lower most expanded tree
         else:
             sub_categories = [
                 cat
@@ -89,25 +85,18 @@ class FarahCategoryScraper(Scraper, FarahScraperMixin):
                 if cat.select_one('ul.refinementcategory a.refineLink.active') is None
             ]
 
-        return {
-            'sub_categories': [
-                {
-                    'name': elem.get_text('', strip=True),
-                    'shop_id': self.shop.id,
-                    'parent_id': category.id,
-                    'url': elem.get('href')
-                }
-                for elem in sub_categories
-            ]
-        }
-
-        return {}
+        return [
+            {
+                'name': elem.get_text('', strip=True),
+                'shop_id': self.shop.id,
+                'parent_id': category.id,
+                'url': elem.get('href')
+            }
+            for elem in sub_categories
+        ]
 
     def handle_result(self, result):
-        for url in result.get('product_pages', []):
-            self.defer(FarahProductScraper, **{'page_url': url})
-
-        for data in result.get('sub_categories', []):
+        for data in result:
             kwargs = pop_kwargs(data, ['name', 'shop_id'])
             ShopCategory.get_or_update(defaults=data, **kwargs)
 
@@ -116,10 +105,10 @@ class FarahCategoryScraper(Scraper, FarahScraperMixin):
 
 class FarahProductScraper(Scraper, FarahScraperMixin):
     '''Scrape product description page'''
+
     def parse(self, dom):
-        # if nothing selected it is tree root
         product_pricing = dom.select_one('div.productinfopricing')
-        category_link = dom.select('.breadcrumb > a')[0]
+        category_link = dom.select('.breadcrumb > a')[-1]
 
         category = ShopCategory.get(name=category_link.get_text('', strip=True))
         try:
@@ -159,8 +148,19 @@ class FarahProductScraper(Scraper, FarahScraperMixin):
 
 class FarahProductListingScraper(Scraper, FarahScraperMixin):
     '''Single category products - only leafs since parent information is in category tree'''
+
+    def parse_item_id_from_url(self, url):
+        # example path: clothing/polo-shirts/plain/the-blaney-short-sleeve-polo-shirt-F4KS5050GP.html
+        return urlparse(url).path.split('-')[-1].split('.')[0]
+
     def parse(self, dom):
-        return {}
+        # avoid scraping duplicate products (same product displayed many times under different color)
+        return [
+            elem.get('href')
+            for elem in dom.select('div.productlisting div.name > a')
+            if ShopProduct.get(item_id=self.parse_item_id_from_url(elem.get('href'))) is None
+        ]
 
     def handle_result(self, result):
-        pass
+        for url in result:
+            self.defer(FarahProductScraper, **{'page_url': url})

@@ -11,9 +11,9 @@ class Scraper(object):
     page_url = None
     scraper_cls = RequestMethod
 
-    def __init__(self, page_url=None, paginate=True):
+    def __init__(self, page_url=None, dom=None):
         super().__init__()
-        self.paginate = paginate
+        self.dom = dom
 
         if page_url is not None:
             self.page_url = page_url
@@ -30,9 +30,12 @@ class Scraper(object):
 
     def run(self):
         '''Scraper runner'''
-        response = self.scraper.get(self.page_url)
-        dom = self.get_parser(response)
-        result = self.parse(dom)
+        # if scraper was initialzied with dom don't repeat page scraping
+        if not self.dom:
+            response = self.scraper.get(self.page_url)
+            self.dom = self.get_parser(response)
+
+        result = self.parse(self.dom)
 
         self.handle_result(result)
 
