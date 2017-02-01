@@ -117,7 +117,7 @@ class FarahProductScraper(Scraper, FarahScraperMixin):
         return {
             'shop_id': self.shop.id,
             'shop_category_id': category.id if category is not None else None,
-            'price': price.get_text('', strip=True)[1:] if price is not None else None,
+            'price': str(price.get_text('', strip=True)[1:]) if price is not None else None,
             'price_range': price_range.get_text(' ', strip=True) if price_range is not None else None,
             'item_id': product_pricing.select_one('span[itemprop="productID"]').get('data-master-id'),
             # name, avatar_bg, product_img
