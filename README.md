@@ -3,7 +3,7 @@
 Bijou is Tinder for commerce.
 
 - currently one scraper has small bug (category name needs to be parsed in better way so error doesn't arrise) ~few lines
-- create simple generator which loops through all pages but the first (since first page product are scraped already) ~20 lines
+- create simple generator which loops through all pages but the first (since first page product are scraped already) max20 lines
 
 ## Instalation
 
