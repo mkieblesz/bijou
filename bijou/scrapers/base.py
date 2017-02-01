@@ -7,7 +7,6 @@ from bijou.scrapers.methods import RequestMethod
 
 class Scraper(object):
     '''Scraping controller interface. Each page type has it's own scraper controller'''
-
     page_url = None
     scraper_cls = RequestMethod
 

@@ -126,6 +126,7 @@ class ShopProduct(ScrapedModel):
     name = db.Column(db.String(128), nullable=True)
     description = db.Column(db.String(2000), nullable=True)
     price = db.Column(db.Float(), nullable=True)
+    price_range = db.Column(db.String(64), nullable=True)
     sizes = db.Column(JSONType(), nullable=True)
     colors = db.Column(JSONType(), nullable=True)
 

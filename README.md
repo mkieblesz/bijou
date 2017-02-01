@@ -2,9 +2,6 @@
 
 Bijou is Tinder for commerce.
 
-- currently one scraper has small bug (category name needs to be parsed in better way so error doesn't arrise) ~few lines
-- create simple generator which loops through all pages but the first (since first page product are scraped already) max20 lines
-
 ## Instalation
 
 Run `make setup` to setup system requirements (tested on Ubuntu 14.04). If you are using mac please install system
@@ -17,8 +14,11 @@ Now create database `make reset-db` and run `make runserver` to start developmen
 
 ## Excercise
 
-Run `make scrape`
-Run `make runserver` and navigate to 'http://localhost:5000/shop_product' and 'http://localhost:5000/shop_category'
+Run `make scrape` to scrape farah.co.uk shop - it might take up to 30 min.
+
+Run `make runserver` and navigate to http://localhost:5000/shop_product and http://localhost:5000/shop_category to
+see product and category data. If you want to see individual object go to http://localhost:5000/shop_product/{id} and
+http://localhost:5000/shop_category/{id}.
 
 
 ## Question
@@ -31,6 +31,7 @@ What not to store?
 
 What to store?
 - data which will be displayed on swipe page and on swipe details page
+- products may have multiple categories so it would be good to have many to many
 - url so we can refresh specific page and not checking whole site (we could scrape most used products more frequenly
     visited than less frquently visited), this is one of the reasons why having each scraper for each data type to
     scrape
@@ -44,15 +45,15 @@ What to store?
 
 Run `make test` to run testing suite.
 
-## Example todo
+## Todo
 
 This is default stuff which should be done in project like this.
 
+- more tests!
 - run run method of scrapers as celery task (upon creating instead put it on queue and workers will evoke run method)
 - one celery scheduled task which loops through all sites scrapers every 5 min and checks it should be rescraped
     (depending on time, depth of scraping etc.)
 - better error handling in scraper parsers
-- write more tests
 - write browser method scraper - for some sites just https requesting won't work
 - write better serialization/filtering models by using get parameters via model endpoint (or use 3rd party like
     flask-restful)

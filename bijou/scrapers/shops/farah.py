@@ -59,11 +59,11 @@ class FarahCategoryScraper(Scraper, FarahScraperMixin):
         if category is None:
             raise ParserException('Could not retrieve category form category listing')
 
-        # there might be better way to do this
-        is_leaf = False
-        for cat_link in dom.select('.refineLink.active'):
-            if len(cat_link.parent.select('.refineLink')) == 1 and cat_link.get_text('', strip=True) == category_name:
-                is_leaf = True
+        is_leaf = dom.select_one('ul.refinementcategory a.refineLink') is None
+        if not is_leaf:
+            for cat_link in dom.select('.refineLink.active'):
+                if len(cat_link.parent.select('.refineLink')) == 1 and cat_link.get_text('', strip=True) == category_name:
+                    is_leaf = True
 
         if is_leaf:
             # TODO: make pages as big as possible, good candidate for new scraper (if there will be a lot of pages
@@ -111,15 +111,14 @@ class FarahProductScraper(Scraper, FarahScraperMixin):
         category_link = dom.select('.breadcrumb > a')[-1]
 
         category = ShopCategory.get(name=category_link.get_text('', strip=True))
-        try:
-            category.id
-        except:
-            import ipdb
-            ipdb.set_trace()
+        price = product_pricing.select_one('div.salesprice')
+        price_range = product_pricing.select_one('div.price')
+
         return {
             'shop_id': self.shop.id,
-            'shop_category_id': category.id,
-            'price': product_pricing.select_one('div.salesprice').get_text('', strip=True)[1:],
+            'shop_category_id': category.id if category is not None else None,
+            'price': price.get_text('', strip=True)[1:] if price is not None else None,
+            'price_range': price_range.get_text(' ', strip=True) if price_range is not None else None,
             'item_id': product_pricing.select_one('span[itemprop="productID"]').get('data-master-id'),
             # name, avatar_bg, product_img
             'colors': [
