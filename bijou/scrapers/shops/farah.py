@@ -17,7 +17,14 @@ class FarahScraperMixin(object):
 
 
 class FarahScraper(Scraper, FarahScraperMixin):
-    '''Entrypoint scraper, scrapes root categories'''
+    '''
+    Entrypoint scraper, scrapes root categories.
+
+    1. Enter home page.
+    2. Scrape home categories.
+    3. Enter each home category and scrape it's descendants.
+    4. When leaf is reached scrape all products by iterating over all pages.
+    '''
     page_url = 'http://www.farah.co.uk/'
 
     def parse(self, dom):
@@ -32,9 +39,12 @@ class FarahScraper(Scraper, FarahScraperMixin):
         ]
 
     def handle_result(self, result):
+        root_category = ShopCategory.get_or_update(name='Home', shop_id=self.shop.id, defaults={'url': self.page_url})
+        root_category.save()
+
         # TODO: use bulk update
         for data in result:
-            ShopCategory.get_or_update(**data)
+            ShopCategory.get_or_update(parent_id=root_category.id, **data)
             self.defer(FarahCategoryScraper, **{'page_url': data['url']})
 
 
@@ -55,7 +65,7 @@ class FarahCategoryScraper(Scraper, FarahScraperMixin):
                 is_leaf = True
 
         if is_leaf:
-            # loop through the products and start product scrapers, ideally by manipulating get params
+            # TODO: loop through the products and start product scrapers, ideally by manipulating get params
             # if self.paginate:
             #     for product_listing_url in product_page_generator():
             #         # don't paginate
@@ -86,7 +96,6 @@ class FarahCategoryScraper(Scraper, FarahScraperMixin):
                     'shop_id': self.shop.id,
                     'parent_id': category.id,
                     'url': elem.get('href')
-
                 }
                 for elem in sub_categories
             ]
@@ -110,8 +119,14 @@ class FarahProductScraper(Scraper, FarahScraperMixin):
     def parse(self, dom):
         # if nothing selected it is tree root
         product_pricing = dom.select_one('div.productinfopricing')
-        category = ShopCategory.get(name=dom.select_one('.breadcrumb > a.breadcrumblast').get_text('', strip=True))
+        category_link = dom.select('.breadcrumb > a')[0]
 
+        category = ShopCategory.get(name=category_link.get_text('', strip=True))
+        try:
+            category.id
+        except:
+            import ipdb
+            ipdb.set_trace()
         return {
             'shop_id': self.shop.id,
             'shop_category_id': category.id,

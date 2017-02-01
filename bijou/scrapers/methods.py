@@ -1,4 +1,5 @@
 import requests
+
 from bijou.constants import REQUEST_METHOD_RETRIES
 from bijou.exceptions import RetryLimitException
 
@@ -45,6 +46,8 @@ class RequestMethod(BaseMethod):
             # reset TCP session
             self.reset_session()
             response = self.generic(method, url, retry=retry)
+
+        print('{} to {}'.format(method, url))
 
         return response.text
 

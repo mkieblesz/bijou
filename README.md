@@ -26,7 +26,8 @@ Run `make runserver` and navigate to 'http://localhost:5000/shop_product' and 'h
 What not to store?
 - categories which are just filters upon product special types (sale, new, classic)
 - availability of products for different colors/sizes (this data will need to be retrieved dynamically, this is not
-    type of data which is for scraping)
+    type of data which is for scraping, another is we can spin up workers which will hit with as much concurrency as
+    we want)
 
 What to store?
 - data which will be displayed on swipe page and on swipe details page
