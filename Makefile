@@ -25,7 +25,7 @@ setup-system:
 setup-db:
 	@echo "--> Setting up postgres"
 	sudo apt-get install -y postgresql
-	sudo -H -u postgres bash -c "createuser --superuser $USER"
+	sudo -H -u postgres bash -c "createuser --superuser root"
 	sudo psql -c "CREATE ROLE bijou WITH PASSWORD 'bijou' CREATEDB LOGIN;"
 
 setup: setup-system setup-db
