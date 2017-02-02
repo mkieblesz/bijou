@@ -3,9 +3,17 @@
 ################
 
 setup-system:
-	@echo "--> Use latest version of Python"
+	@echo "--> Update repos used in this project"
+	sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 	sudo add-apt-repository ppa:jonathonf/python-3.6
 	sudo apt-get update
+
+	@echo "--> Updating C compilers to 4.9 (for psycopg2 to compile)"
+	sudo apt-get install build-essential git gcc-4.9 cpp-4.9 g++-4.9
+	sudo rm /usr/bin/gcc /usr/bin/cpp /usr/bin/x86_64-linux-gnu-gcc
+	sudo ln -s /usr/bin/gcc-4.9 /usr/bin/x86_64-linux-gnu-gcc
+	sudo ln -s /usr/bin/gcc-4.9 /usr/bin/gcc
+	sudo ln -s /usr/bin/cpp-4.9 /usr/bin/cpp
 
 	@echo "--> Installing Python 3.6"
 	sudo apt-get install python3.6 python3.6-dev
@@ -15,8 +23,10 @@ setup-system:
 	sudo apt-get install redis-server
 
 setup-db:
+	@echo "--> Setting up postgres"
 	sudo apt-get install postgresql
-	psql postgres -c "CREATE ROLE bijou WITH PASSWORD 'bijou' CREATEDB LOGIN;"
+	sudo -H -u postgres bash -c "createuser --superuser $USER"
+	sudo psql -c "CREATE ROLE bijou WITH PASSWORD 'bijou' CREATEDB LOGIN;"
 
 setup: setup-system setup-db
 
