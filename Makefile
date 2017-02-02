@@ -8,8 +8,8 @@ setup-system:
 	sudo add-apt-repository ppa:jonathonf/python-3.6
 	sudo apt-get update
 
-	@echo "--> Updating C compilers to 4.9 (for psycopg2 to compile)"
-	sudo apt-get install build-essential git gcc-4.9 cpp-4.9 g++-4.9
+	@echo "--> Updating C compilers to 4.9 and add libpq-dev (for psycopg2 to compile)"
+	sudo apt-get install build-essential git libpq-dev gcc-4.9 cpp-4.9 g++-4.9
 	sudo rm /usr/bin/gcc /usr/bin/cpp /usr/bin/x86_64-linux-gnu-gcc
 	sudo ln -s /usr/bin/gcc-4.9 /usr/bin/x86_64-linux-gnu-gcc
 	sudo ln -s /usr/bin/gcc-4.9 /usr/bin/gcc
