@@ -16,7 +16,7 @@ setup-system:
 	sudo ln -s /usr/bin/cpp-4.9 /usr/bin/cpp
 
 	@echo "--> Installing Python 3.6"
-	sudo apt-get install -y python3.6 python3.6-dev
+	sudo apt-get install -y python3.6 python3.6-dev python3-pip
 	sudo pip3 install virtualenv
 
 	@echo "--> Install Redis for celery"
