@@ -1,5 +1,7 @@
 import requests
+import os
 
+from bijou.config.default import base_dir
 from bijou.constants import REQUEST_METHOD_RETRIES
 from bijou.exceptions import RetryLimitException
 
@@ -47,7 +49,8 @@ class RequestMethod(BaseMethod):
             self.reset_session()
             response = self.generic(method, url, retry=retry)
 
-        print('{} to {}'.format(method, url))
+        with open(os.path.join(base_dir, 'output.log'), 'w') as f:
+            print('{} to {}'.format(method, url), file=f)
 
         return response.text
 

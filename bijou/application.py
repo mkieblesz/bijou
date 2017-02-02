@@ -55,7 +55,7 @@ def register_db(app):
 
 def register_endpoints(app):
     from bijou.api.endpoints import ModelEndpoint, SwipeEndpoint
-    from bijou.web.views import HomeView
+    from bijou.web.views import HomeView, ScrapeStreamView, ScrapeView
 
     # api endpoints
     app.add_url_rule('/swipe/<int:product_id>', view_func=SwipeEndpoint.as_view('swipe'))
@@ -64,6 +64,8 @@ def register_endpoints(app):
 
     # web endpoints
     app.add_url_rule('/', view_func=HomeView.as_view('homeview'))
+    app.add_url_rule('/stream', view_func=ScrapeStreamView.as_view('scrapestreamview'))
+    app.add_url_rule('/scrape', view_func=ScrapeView.as_view('scrapeview'))
 
     return app
 

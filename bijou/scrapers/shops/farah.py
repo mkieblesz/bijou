@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+
 from bijou.exceptions import ParserException
 from bijou.models import Shop, ShopCategory, ShopProduct
 from bijou.scrapers.base import Scraper

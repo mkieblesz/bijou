@@ -4,27 +4,27 @@
 
 setup-system:
 	@echo "--> Update repos used in this project"
-	sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-	sudo add-apt-repository ppa:jonathonf/python-3.6
+	sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+	sudo add-apt-repository ppa:jonathonf/python-3.6 -y
 	sudo apt-get update
 
 	@echo "--> Updating C compilers to 4.9 and add libpq-dev (for psycopg2 to compile)"
-	sudo apt-get install build-essential git libpq-dev gcc-4.9 cpp-4.9 g++-4.9
+	sudo apt-get install -y build-essential git libpq-dev gcc-4.9 cpp-4.9 g++-4.9
 	sudo rm /usr/bin/gcc /usr/bin/cpp /usr/bin/x86_64-linux-gnu-gcc
 	sudo ln -s /usr/bin/gcc-4.9 /usr/bin/x86_64-linux-gnu-gcc
 	sudo ln -s /usr/bin/gcc-4.9 /usr/bin/gcc
 	sudo ln -s /usr/bin/cpp-4.9 /usr/bin/cpp
 
 	@echo "--> Installing Python 3.6"
-	sudo apt-get install python3.6 python3.6-dev
+	sudo apt-get install -y python3.6 python3.6-dev
 	sudo pip3 install virtualenv
 
 	@echo "--> Install Redis for celery"
-	sudo apt-get install redis-server
+	sudo apt-get install -y redis-server
 
 setup-db:
 	@echo "--> Setting up postgres"
-	sudo apt-get install postgresql
+	sudo apt-get install -y postgresql
 	sudo -H -u postgres bash -c "createuser --superuser $USER"
 	sudo psql -c "CREATE ROLE bijou WITH PASSWORD 'bijou' CREATEDB LOGIN;"
 
@@ -50,7 +50,7 @@ runserver:
 	.venv/bin/python manage.py runserver
 
 rungunicornserver:
-	.venv/bin/gunicorn wsgi --bind 127.0.0.1:5001 -w 5 --threads 5
+	.venv/bin/gunicorn wsgi --bind 127.0.0.1:8080 -w 5 --threads 5
 
 ###########
 # Testing #
@@ -92,4 +92,4 @@ reset-db:
 ############
 
 scrape:
-	.venv/bin/python manage.py scrape
+	.venv/bin/python manage.py scrape > output.log
