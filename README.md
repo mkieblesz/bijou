@@ -26,15 +26,14 @@ http://localhost:5000/shop_category/{id}.
 What not to store?
 - categories which are just filters upon product special types (sale, new, classic)
 - availability of products for different colors/sizes (this data will need to be retrieved dynamically, this is not
-    type of data which is for scraping, another is we can spin up workers which will hit with as much concurrency as
-    we want)
+    type of data which is for scraping)
 
 What to store?
 - data which will be displayed on swipe page and on swipe details page
 - products may have multiple categories so it would be good to have many to many
 - url so we can refresh specific page and not checking whole site (we could scrape most used products more frequenly
     visited than less frquently visited), this is one of the reasons why having each scraper for each data type to
-    scrape
+    scrape, another is we can spin up workers which will hit with as much concurrency as we want)
 - colors and sizes in JSON field (postgres is quick in filtering those and it simplifies things a lot), to diplay
     filters like on farah on category we will just need to aggregate
 - colors should contain image urls of a product
