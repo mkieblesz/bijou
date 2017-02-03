@@ -161,6 +161,10 @@ class User(Model, UserMixin):
     def name(self):
         return " ".join((self.first_name or "", self.last_name or "")).strip() or None
 
+    @property
+    def is_admin(self):
+        return self.is_staff
+
 
 class Swipe(Model):
     '''User individual swipe'''
