@@ -49,8 +49,9 @@ class RequestMethod(BaseMethod):
             self.reset_session()
             response = self.generic(method, url, retry=retry)
 
-        with open(os.path.join(base_dir, 'output.log'), 'w') as f:
-            print('{} to {}'.format(method, url), file=f)
+        # with open(os.path.join(base_dir, 'output.log'), 'w') as f:
+        #     print('{} to {}'.format(method, url), file=f)
+        print('{} to {}'.format(method, url))
 
         return response.text
 

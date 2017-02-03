@@ -18,6 +18,7 @@ class HomeView(BaseView):
 
 class ScrapeStreamView(BaseView):
     def get(self, *args, **kwargs):
+        # TODO: use websockets here/any 3rd party which will output logs like on ci tools
         def log_generator():
             with open(os.path.join(base_dir, 'output.log')) as f:
                 while True:
