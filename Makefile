@@ -92,4 +92,4 @@ reset-db:
 ############
 
 scrape:
-	.venv/bin/python manage.py scrape > output.log
+	.venv/bin/python manage.py scrape

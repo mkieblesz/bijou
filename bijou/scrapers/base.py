@@ -1,37 +1,51 @@
-from scrapers import RequestScraper
+import json
+from bs4 import BeautifulSoup
+
+from bijou.exceptions import ParserException
+from bijou.scrapers.methods import RequestMethod
 
 
 class Scraper(object):
-    '''Scraping controller interface'''
-    start_page_url = None
-    scraper_cls = None
+    '''Scraping controller interface. Each page type has it's own scraper controller'''
+    page_url = None
+    scraper_cls = RequestMethod
 
-    def __init__(self, scraper_cls=RequestScraper):
+    def __init__(self, page_url=None, dom=None):
         super().__init__()
+        self.dom = dom
 
-        self.scraper_cls
-        self.session = self.create_session()
+        if page_url is not None:
+            self.page_url = page_url
+        self.scraper = self.scraper_cls()
+
+    def get_parser(self, response, html_parser='lxml', parse_only=None):
+        return BeautifulSoup(response, html_parser, parse_only=parse_only)
+
+    def get_json_parser(self, response):
+        try:
+            return json.loads(response)
+        except ValueError:
+            raise ParserException('Couldn\'t load json response')
 
     def run(self):
         '''Scraper runner'''
-        self.scrape_categories(self.start_page_url)
+        # if scraper was initialzied with dom don't repeat page scraping
+        if not self.dom:
+            response = self.scraper.get(self.page_url)
+            self.dom = self.get_parser(response)
+
+        result = self.parse(self.dom)
+
+        self.handle_result(result)
+
+    def defer(self, ScraperClass, *args, **kwargs):
+        ScraperClass(*args, **kwargs).run()
+
+    def handle_result(self, result):
+        raise NotImplementedError('Implement')
 
     def parse(self, dom):
-        pass
+        raise NotImplementedError('Implement')
 
     def scrape(self, scraping_method):
-        pass
-
-    def scrape_category_listing(self, category_listing_url):
-        '''Loop through categories given start url'''
-        pass
-
-    def scrape_category(self, category_url):
-        '''Loop through all pages in category url and scrape products'''
-        pass
-
-    def parse_product(self):
-        pass
-
-    def parse_category(self):
-        pass
+        raise NotImplementedError('Implement')
